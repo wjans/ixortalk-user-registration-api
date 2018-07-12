@@ -17,17 +17,24 @@ Rest call to register a new user in the platform.  Configurable default roles wi
 === Request
 
 Via curl:
-include::{snippets}/mailing/send/success/curl-request.adoc[]
+include::{snippets}/register/ok/curl-request.adoc[]
 
 HTTP request:
-include::{snippets}/mailing/send/success/http-request.adoc[]
-
-==== Request Headers
-include::{snippets}/mailing/send/success/request-headers.adoc[]
+include::{snippets}/register/ok/http-request.adoc[]
 
 ==== Request Fields
-include::{snippets}/mailing/send/success/request-fields.adoc[]
+include::{snippets}/register/ok/request-fields.adoc[]
 
 === Response
 
-include::{snippets}/mailing/send/success/http-response.adoc[]
+When everything is ok:
+
+include::{snippets}/register/ok/http-response.adoc[]
+
+When the request body is invalid:
+
+include::{snippets}/register/invalid-request-body/http-response.adoc[]
+
+When the authserver returns an error, the HTTP status code returned by the auth server is propagated back to the client too:
+
+include::{snippets}/register/error-returned-by-authserver/http-response.adoc[]

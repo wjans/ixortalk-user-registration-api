@@ -1,18 +1,18 @@
 /**
  * The MIT License (MIT)
- * <p>
+ *
  * Copyright (c) 2016-present IxorTalk CVBA
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -47,6 +47,7 @@ import static com.ixortalk.user.registration.api.auth.User.newUser;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.http.ContentType.JSON;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
+import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static org.assertj.core.util.Sets.newHashSet;
@@ -54,7 +55,7 @@ import static org.assertj.core.util.Sets.newHashSet;
 @OAuth2ContextConfiguration(AbstractSpringIntegrationTest.AdminClientCredentialsResourceDetails.class)
 public class UserRegistrationControllerIntegrationTest extends AbstractSpringIntegrationTest {
 
-    public static final String LOGIN = nextString("login-");
+    public static final String LOGIN = nextString("testUser-") + "@ixortalk.com";
     public static final String FIRST_NAME = nextString("firstName-");
     public static final String LAST_NAME = nextString("lastName-");
     public static final String LANG_KEY = "en";
@@ -120,7 +121,7 @@ public class UserRegistrationControllerIntegrationTest extends AbstractSpringInt
     }
 
     @Test
-    public void errorReturnedByAuthServer() throws JsonProcessingException {
+    public void authServerReturnsBadRequest() throws JsonProcessingException {
         stubFor(
                 post(urlEqualTo("/api/users"))
                         .withHeader("Authorization", containing("Bearer"))
@@ -132,6 +133,21 @@ public class UserRegistrationControllerIntegrationTest extends AbstractSpringInt
                 .post("/")
                 .then()
                 .statusCode(HTTP_BAD_REQUEST);
+    }
+
+    @Test
+    public void authServerReturnsInternalServerError() throws JsonProcessingException {
+        stubFor(
+                post(urlEqualTo("/api/users"))
+                        .withHeader("Authorization", containing("Bearer"))
+                        .willReturn(aResponse().withStatus(HTTP_INTERNAL_ERROR)));
+
+        given()
+                .contentType(JSON)
+                .body(objectMapper.writeValueAsString(aCreateUserDTO().build()))
+                .post("/")
+                .then()
+                .statusCode(HTTP_INTERNAL_ERROR);
     }
 
     @Test

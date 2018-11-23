@@ -23,21 +23,16 @@
  */
 package com.ixortalk.user.registration.api;
 
-import javax.inject.Inject;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer;
 import com.jayway.restassured.RestAssured;
-import feign.RequestInterceptor;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.netflix.feign.FeignContext;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
 import org.springframework.security.oauth2.client.test.RestTemplateHolder;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
@@ -47,13 +42,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
+import javax.inject.Inject;
+
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_ADMIN;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_SECRET_ADMIN;
 import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig;
 import static com.jayway.restassured.config.RestAssuredConfig.config;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.security.oauth2.client.test.OAuth2ContextSetup.standard;
-import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 @SpringBootTest(classes = {UserRegistrationApiApplication.class, OAuth2EmbeddedTestServer.class}, webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
@@ -76,9 +72,6 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
     @Inject
     protected ObjectMapper objectMapper;
 
-    @Inject
-    private FeignContext feignContext;
-
     private RestOperations restTemplate = new RestTemplate();
 
     protected String getOAuth2AccessTokenUri() {
@@ -98,12 +91,6 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
 
     public void setRestTemplate(RestOperations restTemplate) {
         this.restTemplate = restTemplate;
-        if (restTemplate instanceof OAuth2RestTemplate) {
-            feignContext.getContextNames()
-                    .stream()
-                    .map(feignContextName -> feignContext.getInstance(feignContextName, RequestInterceptor.class))
-                    .forEach(requestInterceptor -> setField(requestInterceptor, "oAuth2RestTemplate", restTemplate, OAuth2RestTemplate.class));
-        }
     }
 
     public static class AdminClientCredentialsResourceDetails extends ClientCredentialsResourceDetails {

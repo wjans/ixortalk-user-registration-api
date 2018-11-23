@@ -24,22 +24,16 @@
 package com.ixortalk.user.registration.api;
 
 import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
-import io.prometheus.client.spring.boot.EnablePrometheusEndpoint;
-import io.prometheus.client.spring.boot.EnableSpringBootMetricsCollector;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
 @SpringBootApplication
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@EnablePrometheusEndpoint
-@EnableSpringBootMetricsCollector
-@EnableAutoConfiguration
 @EnableConfigurationProperties(IxorTalkConfigProperties.class)
-@EnableFeignClients
+@EnableOAuth2Sso
 public class UserRegistrationApiApplication {
 
     public static void main(String[] args) {

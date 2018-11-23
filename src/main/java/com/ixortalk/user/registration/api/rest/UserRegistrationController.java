@@ -23,44 +23,34 @@
  */
 package com.ixortalk.user.registration.api.rest;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-
-import com.ixortalk.user.registration.api.auth.AuthServer;
-import com.ixortalk.user.registration.api.auth.CreateUserDTO;
 import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.google.common.collect.Sets.newHashSet;
-import static com.ixortalk.user.registration.api.auth.User.newUser;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import javax.inject.Inject;
+
+import java.security.Principal;
+
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 public class UserRegistrationController {
 
     @Inject
-    private AuthServer authServer;
-
-    @Inject
     private IxorTalkConfigProperties ixorTalkConfigProperties;
 
-    @PostMapping(path = "/", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> register(@Valid @RequestBody CreateUserDTO createUserDTO) {
-        authServer.createUser(
-                newUser()
-                        .withLogin(createUserDTO.getUsername())
-                        .withFirstName(createUserDTO.getFirstName())
-                        .withLastName(createUserDTO.getLastName())
-                        .withEmail(createUserDTO.getUsername())
-                        .withActivated(true)
-                        .withLangKey(createUserDTO.getLangKey())
-                        .withAuthorities(newHashSet(ixorTalkConfigProperties.getUserRegistration().getDefaultRoles()))
-                        .build()
-        );
-        return ok().build();
+    @GetMapping(path = "/hello")
+    public ResponseEntity<?> hello(Principal principal) {
+        return ok("Hello, " + principal.getName());
     }
+
+
+    @GetMapping(path = "/admin")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    public ResponseEntity<?> admin() {
+        return ok("Admin rights!");
+    }
+
 }

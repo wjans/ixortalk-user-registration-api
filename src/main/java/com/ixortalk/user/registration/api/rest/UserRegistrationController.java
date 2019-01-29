@@ -23,16 +23,21 @@
  */
 package com.ixortalk.user.registration.api.rest;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-
 import com.ixortalk.user.registration.api.auth.AuthServer;
 import com.ixortalk.user.registration.api.auth.CreateUserDTO;
+import com.ixortalk.user.registration.api.auth.UpdateUserDTO;
+import com.ixortalk.user.registration.api.auth.User;
 import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+
+import java.security.Principal;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static com.ixortalk.user.registration.api.auth.User.newUser;
@@ -61,6 +66,16 @@ public class UserRegistrationController {
                         .withAuthorities(newHashSet(ixorTalkConfigProperties.getUserRegistration().getDefaultRoles()))
                         .build()
         );
+        return ok().build();
+    }
+
+    @PutMapping(path = "/", consumes = APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> update(@Valid @RequestBody UpdateUserDTO updateUserDTO, Principal principal) {
+        User exitingUser = authServer.getUser(principal.getName());
+        exitingUser.updateFirstName(updateUserDTO.getFirstName());
+        exitingUser.updateLastName(updateUserDTO.getLastName());
+        exitingUser.updateLangKey(updateUserDTO.getLangKey());
+        authServer.updateUser(exitingUser);
         return ok().build();
     }
 }

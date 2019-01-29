@@ -24,32 +24,22 @@
 package com.ixortalk.user.registration.api.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.ixortalk.user.registration.api.AbstractRestDocTest;
 import com.ixortalk.user.registration.api.AbstractSpringIntegrationTest;
-import org.junit.Before;
+import com.ixortalk.user.registration.api.auth.User;
 import org.junit.Test;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.containing;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
+import static com.ixortalk.test.oauth2.OAuth2TestTokens.authorizationHeader;
+import static com.ixortalk.test.util.Randomizer.nextString;
 import static com.ixortalk.user.registration.api.auth.CreateUserDTOTestBuilder.aCreateUserDTO;
-import static com.ixortalk.user.registration.api.rest.UserRegistrationControllerIntegrationTest.FIRST_NAME;
-import static com.ixortalk.user.registration.api.rest.UserRegistrationControllerIntegrationTest.LANG_KEY;
-import static com.ixortalk.user.registration.api.rest.UserRegistrationControllerIntegrationTest.LAST_NAME;
-import static com.ixortalk.user.registration.api.rest.UserRegistrationControllerIntegrationTest.LOGIN;
+import static com.ixortalk.user.registration.api.auth.User.newUser;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.http.ContentType.JSON;
-import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
-import static java.net.HttpURLConnection.HTTP_OK;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static java.net.HttpURLConnection.*;
+import static org.assertj.core.util.Sets.newHashSet;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.JsonFieldType.NULL;
 import static org.springframework.restdocs.payload.JsonFieldType.STRING;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -57,19 +47,32 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 
 @OAuth2ContextConfiguration(AbstractSpringIntegrationTest.AdminClientCredentialsResourceDetails.class)
-public class UserRegistrationControllerRestDocTest extends AbstractRestDocTest {
+public class UserRegistrationController_Register_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
 
-    @Before
-    public void before() {
-        stubFor(
-                post(urlEqualTo("/api/users"))
-                        .withHeader("Authorization", containing("Bearer"))
-                        .willReturn(aResponse().withStatus(HTTP_OK)));
-    }
+    private static final String LOGIN = nextString("testUser-") + "@ixortalk.com";
+    private static final String FIRST_NAME = nextString("firstName-");
+    private static final String LAST_NAME = nextString("lastName-");
+    private static final String LANG_KEY = "en";
 
     @Test
     public void success() throws JsonProcessingException {
-        given(this.spec)
+        stubFor(
+                post(urlEqualTo("/api/users"))
+                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .willReturn(aResponse().withStatus(HTTP_OK)));
+
+        User expectedUser =
+                newUser()
+                        .withLogin(LOGIN)
+                        .withFirstName(FIRST_NAME)
+                        .withLastName(LAST_NAME)
+                        .withEmail(LOGIN)
+                        .withActivated(true)
+                        .withLangKey(LANG_KEY)
+                        .withAuthorities(newHashSet(ixorTalkConfigProperties.getUserRegistration().getDefaultRoles()))
+                        .build();
+
+        given()
                 .filter(
                         document("register/ok",
                                 preprocessRequest(staticUris(), prettyPrint()),
@@ -94,11 +97,16 @@ public class UserRegistrationControllerRestDocTest extends AbstractRestDocTest {
                 .post("/")
                 .then()
                 .statusCode(HTTP_OK);
+
+        verify(
+                postRequestedFor(urlMatching("/api/users"))
+                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .withRequestBody(equalToJson(objectMapper.writeValueAsString(expectedUser))));
     }
 
     @Test
     public void invalidRequestBody() throws JsonProcessingException {
-        given(this.spec)
+        given()
                 .filter(
                         document("register/invalid-request-body",
                                 preprocessRequest(staticUris(), prettyPrint()),
@@ -128,13 +136,13 @@ public class UserRegistrationControllerRestDocTest extends AbstractRestDocTest {
     }
 
     @Test
-    public void errorReturnedByAuthServer() throws JsonProcessingException {
+    public void authServerReturnsBadRequest() throws JsonProcessingException {
         stubFor(
                 post(urlEqualTo("/api/users"))
-                        .withHeader("Authorization", containing("Bearer"))
+                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
                         .willReturn(aResponse().withStatus(HTTP_BAD_REQUEST)));
 
-        given(this.spec)
+        given()
                 .filter(
                         document("register/error-returned-by-authserver",
                                 preprocessRequest(staticUris(), prettyPrint()),
@@ -152,5 +160,37 @@ public class UserRegistrationControllerRestDocTest extends AbstractRestDocTest {
                 .post("/")
                 .then()
                 .statusCode(HTTP_BAD_REQUEST);
+    }
+
+    @Test
+    public void authServerReturnsInternalServerError() throws JsonProcessingException {
+        stubFor(
+                post(urlEqualTo("/api/users"))
+                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .willReturn(aResponse().withStatus(HTTP_INTERNAL_ERROR)));
+
+        given()
+                .contentType(JSON)
+                .body(objectMapper.writeValueAsString(aCreateUserDTO().build()))
+                .post("/")
+                .then()
+                .statusCode(HTTP_INTERNAL_ERROR);
+    }
+
+    @Test
+    public void anythingButRootPathRequiresAuthentication() throws JsonProcessingException {
+        given()
+                .when()
+                .contentType(JSON)
+                .body(objectMapper.writeValueAsString(
+                        aCreateUserDTO()
+                                .withUsername(LOGIN)
+                                .withFirstName(FIRST_NAME)
+                                .withLastName(LAST_NAME)
+                                .withLangKey(LANG_KEY)
+                                .build()))
+                .post("/someOtherPath")
+                .then()
+                .statusCode(HTTP_UNAUTHORIZED);
     }
 }

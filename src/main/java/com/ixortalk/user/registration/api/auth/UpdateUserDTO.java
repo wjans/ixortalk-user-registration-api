@@ -23,25 +23,28 @@
  */
 package com.ixortalk.user.registration.api.auth;
 
-import com.ixortalk.user.registration.api.config.FeignConfiguration;
-import org.springframework.cloud.netflix.feign.FeignClient;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import javax.validation.constraints.NotNull;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+public class UpdateUserDTO {
 
-@FeignClient(name = "authserver",url = "${ixortalk.server.authserver.url}", configuration = FeignConfiguration.class, decode404 = true)
-public interface AuthServer {
+    @NotNull
+    private String firstName;
 
-    @RequestMapping(method = GET, path = "/api/users/{login}", produces = APPLICATION_JSON_VALUE)
-    User getUser(@PathVariable("login") String login);
+    @NotNull
+    private String lastName;
 
-    @RequestMapping(method = POST, path = "/api/users", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
-    User createUser(User user);
+    @NotNull
+    private String langKey;
 
-    @RequestMapping(method = PUT, path = "/api/users", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
-    User updateUser(User user);
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getLangKey() {
+        return langKey;
+    }
 }

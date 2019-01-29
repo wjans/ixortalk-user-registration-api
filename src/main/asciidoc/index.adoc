@@ -38,3 +38,40 @@ include::{snippets}/register/invalid-request-body/http-response.adoc[]
 When the authserver returns an error, the HTTP status code returned by the auth server is propagated back to the client too:
 
 include::{snippets}/register/error-returned-by-authserver/http-response.adoc[]
+
+== Update User
+
+Rest call to update logged in user
+
+=== Request
+
+Via curl:
+include::{snippets}/update/ok/curl-request.adoc[]
+
+HTTP request:
+include::{snippets}/update/ok/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/update/ok/request-fields.adoc[]
+
+=== Response
+
+When everything is ok:
+
+include::{snippets}/update/ok/http-response.adoc[]
+
+When the request body is invalid:
+
+include::{snippets}/update/invalid-request-body/http-response.adoc[]
+
+When the logged in user is not found:
+
+include::{snippets}/update/logged-in-user-not-found/http-response.adoc[]
+
+When there is no logged in user:
+
+include::{snippets}/update/no-logged-in-user/http-response.adoc[]
+
+When the authserver returns an error, the HTTP status code returned by the auth server is propagated back to the client too:
+
+include::{snippets}/update/error-returned-by-authserver/http-response.adoc[]

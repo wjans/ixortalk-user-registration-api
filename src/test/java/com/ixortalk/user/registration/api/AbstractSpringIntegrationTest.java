@@ -26,6 +26,7 @@ package com.ixortalk.user.registration.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer;
+import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import feign.RequestInterceptor;
@@ -87,6 +88,8 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
 
     @Inject
     protected ObjectMapper objectMapper;
+    @Inject
+    protected IxorTalkConfigProperties ixorTalkConfigProperties;
 
     @Inject
     private FeignContext feignContext;

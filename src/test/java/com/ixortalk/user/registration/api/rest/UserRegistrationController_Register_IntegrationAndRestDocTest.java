@@ -26,13 +26,12 @@ package com.ixortalk.user.registration.api.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ixortalk.user.registration.api.AbstractSpringIntegrationTest;
 import com.ixortalk.user.registration.api.auth.User;
-import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
 import org.junit.Test;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 
-import javax.inject.Inject;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
+import static com.ixortalk.test.oauth2.OAuth2TestTokens.authorizationHeader;
 import static com.ixortalk.test.util.Randomizer.nextString;
 import static com.ixortalk.user.registration.api.auth.CreateUserDTOTestBuilder.aCreateUserDTO;
 import static com.ixortalk.user.registration.api.auth.User.newUser;
@@ -48,21 +47,18 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 
 @OAuth2ContextConfiguration(AbstractSpringIntegrationTest.AdminClientCredentialsResourceDetails.class)
-public class UserRegistrationControllerIntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
+public class UserRegistrationController_Register_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
 
     private static final String LOGIN = nextString("testUser-") + "@ixortalk.com";
     private static final String FIRST_NAME = nextString("firstName-");
     private static final String LAST_NAME = nextString("lastName-");
     private static final String LANG_KEY = "en";
 
-    @Inject
-    private IxorTalkConfigProperties ixorTalkConfigProperties;
-
     @Test
     public void success() throws JsonProcessingException {
         stubFor(
                 post(urlEqualTo("/api/users"))
-                        .withHeader("Authorization", containing("Bearer"))
+                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
                         .willReturn(aResponse().withStatus(HTTP_OK)));
 
         User expectedUser =
@@ -104,7 +100,7 @@ public class UserRegistrationControllerIntegrationAndRestDocTest extends Abstrac
 
         verify(
                 postRequestedFor(urlMatching("/api/users"))
-                        .withHeader("Authorization", containing("Bearer"))
+                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
                         .withRequestBody(equalToJson(objectMapper.writeValueAsString(expectedUser))));
     }
 
@@ -143,7 +139,7 @@ public class UserRegistrationControllerIntegrationAndRestDocTest extends Abstrac
     public void authServerReturnsBadRequest() throws JsonProcessingException {
         stubFor(
                 post(urlEqualTo("/api/users"))
-                        .withHeader("Authorization", containing("Bearer"))
+                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
                         .willReturn(aResponse().withStatus(HTTP_BAD_REQUEST)));
 
         given()
@@ -170,7 +166,7 @@ public class UserRegistrationControllerIntegrationAndRestDocTest extends Abstrac
     public void authServerReturnsInternalServerError() throws JsonProcessingException {
         stubFor(
                 post(urlEqualTo("/api/users"))
-                        .withHeader("Authorization", containing("Bearer"))
+                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
                         .willReturn(aResponse().withStatus(HTTP_INTERNAL_ERROR)));
 
         given()

@@ -23,12 +23,13 @@
  */
 package com.ixortalk.user.registration.api.auth;
 
-import java.util.Set;
-
 import com.ixortalk.util.InstanceBuilder;
+
+import java.util.Set;
 
 public class User {
 
+    private Long id;
     private String login;
     private String firstName;
     private String lastName;
@@ -38,6 +39,10 @@ public class User {
     private Set<String> authorities;
 
     private User() {
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getLogin() {
@@ -66,6 +71,18 @@ public class User {
 
     public Set<String> getAuthorities() {
         return authorities;
+    }
+
+    public void updateFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void updateLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void updateLangKey(String langKey) {
+        this.langKey = langKey;
     }
 
     public static Builder newUser() {

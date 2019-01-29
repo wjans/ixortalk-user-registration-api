@@ -23,12 +23,11 @@
  */
 package com.ixortalk.user.registration.api;
 
-import javax.inject.Inject;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer;
 import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.builder.RequestSpecBuilder;
 import feign.RequestInterceptor;
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,6 +36,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.netflix.feign.FeignContext;
+import org.springframework.restdocs.JUnitRestDocumentation;
+import org.springframework.restdocs.restassured.operation.preprocess.UriModifyingOperationPreprocessor;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
 import org.springframework.security.oauth2.client.test.RestTemplateHolder;
@@ -47,11 +48,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
+import javax.inject.Inject;
+
+import static com.google.common.net.HttpHeaders.*;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_ADMIN;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_SECRET_ADMIN;
 import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig;
 import static com.jayway.restassured.config.RestAssuredConfig.config;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.restassured.operation.preprocess.RestAssuredPreprocessors.modifyUris;
 import static org.springframework.security.oauth2.client.test.OAuth2ContextSetup.standard;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
@@ -61,11 +67,17 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 @RunWith(SpringRunner.class)
 public abstract class AbstractSpringIntegrationTest implements RestTemplateHolder {
 
+    private static final String HOST_IXORTALK_COM = "www.ixortalk.com";
+    private static final String HTTPS = "https";
+
     @Rule
     public WireMockRule authServerWireMockRule = new WireMockRule(65444);
 
     @Rule
     public OAuth2ContextSetup context = standard(this);
+
+    @Rule
+    public JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation("target/generated-snippets");
 
     @LocalServerPort
     protected int port;
@@ -81,6 +93,10 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
 
     private RestOperations restTemplate = new RestTemplate();
 
+    protected static UriModifyingOperationPreprocessor staticUris() {
+        return modifyUris().scheme(HTTPS).host(HOST_IXORTALK_COM).removePort();
+    }
+
     protected String getOAuth2AccessTokenUri() {
         return "http://localhost:" + port + "" + contextPath + "/oauth/token";
     }
@@ -90,6 +106,13 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
         RestAssured.port = port;
         RestAssured.basePath = contextPath;
         RestAssured.config = config().objectMapperConfig(objectMapperConfig().jackson2ObjectMapperFactory((cls, charset) -> objectMapper));
+        RestAssured.requestSpecification =
+                new RequestSpecBuilder()
+                        .addFilter(documentationConfiguration(this.restDocumentation))
+                        .addHeader(X_FORWARDED_PROTO, HTTPS)
+                        .addHeader(X_FORWARDED_HOST, HOST_IXORTALK_COM)
+                        .addHeader(X_FORWARDED_PORT, "")
+                        .build();
     }
 
     public RestOperations getRestTemplate() {

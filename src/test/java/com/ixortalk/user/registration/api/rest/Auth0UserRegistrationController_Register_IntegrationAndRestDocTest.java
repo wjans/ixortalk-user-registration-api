@@ -1,0 +1,171 @@
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016-present IxorTalk CVBA
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package com.ixortalk.user.registration.api.rest;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ixortalk.user.registration.api.AbstractSpringIntegrationTest;
+import org.junit.Test;
+import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.ixortalk.test.util.Randomizer.nextString;
+import static com.ixortalk.user.registration.api.auth.CreateUserDTOTestBuilder.aCreateUserDTO;
+import static com.jayway.restassured.RestAssured.given;
+import static com.jayway.restassured.http.ContentType.JSON;
+import static java.net.HttpURLConnection.HTTP_OK;
+
+@OAuth2ContextConfiguration(AbstractSpringIntegrationTest.AdminClientCredentialsResourceDetails.class)
+@TestPropertySource(properties = {"ixortalk.auth0.domain = ixortalk-test.auth0.com"})
+public class Auth0UserRegistrationController_Register_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
+
+    private static final String LOGIN = nextString("testUser-") + "@ixortalk.com";
+    private static final String FIRST_NAME = nextString("firstName-");
+    private static final String LAST_NAME = nextString("lastName-");
+    private static final String LANG_KEY = "en";
+
+    @Test
+    public void success() throws JsonProcessingException {
+
+        given()
+//                .filter(
+//                        document("register/ok",
+//                                preprocessRequest(staticUris(), prettyPrint()),
+//                                preprocessResponse(prettyPrint()),
+//                                requestFields(
+//                                        fieldWithPath("username").type(STRING).description("The username for the user to create (needs to be the users email address)"),
+//                                        fieldWithPath("firstName").type(STRING).description("The user's first name"),
+//                                        fieldWithPath("lastName").type(STRING).description("The user's last name"),
+//                                        fieldWithPath("langKey").type(STRING).description("The user's language ('nl', 'fr', 'en', ... )")
+//                                )
+//                        )
+//                )
+                .when()
+                .contentType(JSON)
+                .body(objectMapper.writeValueAsString(
+                        aCreateUserDTO()
+                                .withUsername(LOGIN)
+                                .withFirstName(FIRST_NAME)
+                                .withLastName(LAST_NAME)
+                                .withLangKey(LANG_KEY)
+                                .build()))
+                .post("/")
+                .then()
+                .statusCode(HTTP_OK);
+
+        verify(0, postRequestedFor(anyUrl()));
+    }
+
+//    @Test
+//    public void invalidRequestBody() throws JsonProcessingException {
+//        given()
+//                .filter(
+//                        document("register/invalid-request-body",
+//                                preprocessRequest(staticUris(), prettyPrint()),
+//                                preprocessResponse(prettyPrint()),
+//                                requestFields(
+//                                        fieldWithPath("username").type(NULL).description("The username for the user to create (needs to be the users email address)"),
+//                                        fieldWithPath("firstName").type(STRING).description("The user's first name"),
+//                                        fieldWithPath("lastName").type(STRING).description("The user's last name"),
+//                                        fieldWithPath("langKey").type(STRING).description("The user's language ('nl', 'fr', 'en', ... )")
+//                                )
+//                        )
+//                )
+//                .when()
+//                .contentType(JSON)
+//                .body(objectMapper.writeValueAsString(
+//                        aCreateUserDTO()
+//                                .withUsername(null)
+//                                .withFirstName(FIRST_NAME)
+//                                .withLastName(LAST_NAME)
+//                                .withLangKey(LANG_KEY)
+//                                .build()))
+//                .post("/")
+//                .then()
+//                .statusCode(HTTP_BAD_REQUEST);
+//
+//        verify(0, postRequestedFor(urlMatching("/api/users")));
+//    }
+//
+//    @Test
+//    public void authServerReturnsBadRequest() throws JsonProcessingException {
+//        stubFor(
+//                post(urlEqualTo("/api/users"))
+//                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+//                        .willReturn(aResponse().withStatus(HTTP_BAD_REQUEST)));
+//
+//        given()
+//                .filter(
+//                        document("register/error-returned-by-authserver",
+//                                preprocessRequest(staticUris(), prettyPrint()),
+//                                preprocessResponse(prettyPrint()),
+//                                requestFields(
+//                                        fieldWithPath("username").type(STRING).description("The username for the user to create (needs to be the users email address)"),
+//                                        fieldWithPath("firstName").type(STRING).description("The user's first name"),
+//                                        fieldWithPath("lastName").type(STRING).description("The user's last name"),
+//                                        fieldWithPath("langKey").type(STRING).description("The user's language ('nl', 'fr', 'en', ... )")
+//                                )
+//                        )
+//                )
+//                .contentType(JSON)
+//                .body(objectMapper.writeValueAsString(aCreateUserDTO().build()))
+//                .post("/")
+//                .then()
+//                .statusCode(HTTP_BAD_REQUEST);
+//    }
+//
+//    @Test
+//    public void authServerReturnsInternalServerError() throws JsonProcessingException {
+//        stubFor(
+//                post(urlEqualTo("/api/users"))
+//                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+//                        .willReturn(aResponse().withStatus(HTTP_INTERNAL_ERROR)));
+//
+//        given()
+//                .contentType(JSON)
+//                .body(objectMapper.writeValueAsString(aCreateUserDTO().build()))
+//                .post("/")
+//                .then()
+//                .statusCode(HTTP_INTERNAL_ERROR);
+//    }
+//
+//    @Test
+//    public void anythingButRootPathRequiresAuthentication() throws JsonProcessingException {
+//        given()
+//                .when()
+//                .contentType(JSON)
+//                .body(objectMapper.writeValueAsString(
+//                        aCreateUserDTO()
+//                                .withUsername(LOGIN)
+//                                .withFirstName(FIRST_NAME)
+//                                .withLastName(LAST_NAME)
+//                                .withLangKey(LANG_KEY)
+//                                .build()))
+//                .post("/someOtherPath")
+//                .then()
+//                .statusCode(HTTP_UNAUTHORIZED);
+//    }
+}

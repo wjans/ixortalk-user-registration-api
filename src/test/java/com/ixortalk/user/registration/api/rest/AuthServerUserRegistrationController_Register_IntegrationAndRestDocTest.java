@@ -47,7 +47,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 
 @OAuth2ContextConfiguration(AbstractSpringIntegrationTest.AdminClientCredentialsResourceDetails.class)
-public class UserRegistrationController_Register_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
+public class AuthServerUserRegistrationController_Register_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
 
     private static final String LOGIN = nextString("testUser-") + "@ixortalk.com";
     private static final String FIRST_NAME = nextString("firstName-");

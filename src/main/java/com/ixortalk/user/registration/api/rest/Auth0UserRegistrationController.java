@@ -23,59 +23,30 @@
  */
 package com.ixortalk.user.registration.api.rest;
 
-import com.ixortalk.user.registration.api.auth.AuthServer;
+import com.ixortalk.autoconfigure.oauth2.OAuth2AutoConfiguration;
+import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Users;
 import com.ixortalk.user.registration.api.auth.CreateUserDTO;
-import com.ixortalk.user.registration.api.auth.UpdateUserDTO;
-import com.ixortalk.user.registration.api.auth.User;
-import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 
-import java.security.Principal;
-
-import static com.google.common.collect.Sets.newHashSet;
-import static com.ixortalk.user.registration.api.auth.User.newUser;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
-public class UserRegistrationController {
+@Conditional(OAuth2AutoConfiguration.Auth0Condition.class)
+public class Auth0UserRegistrationController {
 
     @Inject
-    private AuthServer authServer;
-
-    @Inject
-    private IxorTalkConfigProperties ixorTalkConfigProperties;
+    private Auth0Users auth0Users;
 
     @PostMapping(path = "/", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<?> register(@Valid @RequestBody CreateUserDTO createUserDTO) {
-        authServer.createUser(
-                newUser()
-                        .withLogin(createUserDTO.getUsername())
-                        .withFirstName(createUserDTO.getFirstName())
-                        .withLastName(createUserDTO.getLastName())
-                        .withEmail(createUserDTO.getUsername())
-                        .withActivated(true)
-                        .withLangKey(createUserDTO.getLangKey())
-                        .withAuthorities(newHashSet(ixorTalkConfigProperties.getUserRegistration().getDefaultRoles()))
-                        .build()
-        );
-        return ok().build();
-    }
-
-    @PutMapping(path = "/", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> update(@Valid @RequestBody UpdateUserDTO updateUserDTO, Principal principal) {
-        User exitingUser = authServer.getUser(principal.getName());
-        exitingUser.updateFirstName(updateUserDTO.getFirstName());
-        exitingUser.updateLastName(updateUserDTO.getLastName());
-        exitingUser.updateLangKey(updateUserDTO.getLangKey());
-        authServer.updateUser(exitingUser);
         return ok().build();
     }
 }

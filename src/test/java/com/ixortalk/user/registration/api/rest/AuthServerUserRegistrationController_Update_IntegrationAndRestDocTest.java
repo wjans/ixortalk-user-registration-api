@@ -55,7 +55,7 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 @OAuth2ContextConfiguration(AbstractSpringIntegrationTest.AdminClientCredentialsResourceDetails.class)
-public class UserRegistrationController_Update_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
+public class AuthServerUserRegistrationController_Update_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
 
     private static final Set<String> EXISTING_AUTHORITIES = newHashSet("ROLE_EXISTING_1", "ROLE_EXISTING_2");
 

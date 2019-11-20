@@ -23,44 +23,20 @@
  */
 package com.ixortalk.user.registration.api.config;
 
-import javax.inject.Inject;
+import com.ixortalk.autoconfigure.oauth2.IxorTalkHttpSecurityConfigurer;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ixortalk.user.registration.api.feign.OAuth2FeignRequestInterceptor;
-import feign.Logger;
-import feign.codec.Decoder;
-import feign.codec.Encoder;
-import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import static org.springframework.http.HttpMethod.POST;
 
-public class FeignConfiguration {
+@Configuration
+public class SecurityConfig implements IxorTalkHttpSecurityConfigurer {
 
-    @Inject
-    private ObjectMapper objectMapper;
-
-    @Inject
-    private OAuth2ProtectedResourceDetails oAuth2ProtectedResourceDetails;
-
-    @Bean
-    Logger.Level feignLoggerLevel() {
-        return Logger.Level.BASIC;
-    }
-
-    @Bean
-    public Decoder feignDecoder() {
-        return new JacksonDecoder(objectMapper);
-    }
-
-    @Bean
-    public Encoder feignEncoder() {
-        return new JacksonEncoder(objectMapper);
-    }
-
-    @Bean
-    public OAuth2FeignRequestInterceptor requestInterceptor() {
-        return new OAuth2FeignRequestInterceptor(new OAuth2RestTemplate(oAuth2ProtectedResourceDetails));
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()
+                .antMatchers(POST, "/").permitAll()
+                .anyRequest().authenticated();
     }
 }

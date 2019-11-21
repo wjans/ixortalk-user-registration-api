@@ -26,6 +26,7 @@ package com.ixortalk.user.registration.api;
 import com.auth0.client.mgmt.ManagementAPI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Roles;
 import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Users;
 import com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer;
 import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
@@ -92,7 +93,10 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
     protected String contextPath;
 
     @MockBean
-    private Auth0Users auth0Users;
+    protected Auth0Users auth0Users;
+
+    @MockBean
+    protected Auth0Roles auth0Roles;
 
     @MockBean
     private ManagementAPI managementAPI;

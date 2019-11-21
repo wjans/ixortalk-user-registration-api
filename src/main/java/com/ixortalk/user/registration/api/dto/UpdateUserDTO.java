@@ -21,14 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.ixortalk.user.registration.api.auth;
+package com.ixortalk.user.registration.api.dto;
 
 import javax.validation.constraints.NotNull;
 
-public class CreateUserDTO {
-
-    @NotNull
-    private String username;
+public class UpdateUserDTO {
 
     @NotNull
     private String firstName;
@@ -38,10 +35,6 @@ public class CreateUserDTO {
 
     @NotNull
     private String langKey;
-
-    public String getUsername() {
-        return username;
-    }
 
     public String getFirstName() {
         return firstName;

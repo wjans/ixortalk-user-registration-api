@@ -25,8 +25,8 @@ package com.ixortalk.user.registration.api.rest;
 
 import com.ixortalk.autoconfigure.oauth2.OAuth2AutoConfiguration;
 import com.ixortalk.user.registration.api.auth.AuthServer;
-import com.ixortalk.user.registration.api.auth.CreateUserDTO;
-import com.ixortalk.user.registration.api.auth.UpdateUserDTO;
+import com.ixortalk.user.registration.api.dto.CreateUserDTO;
+import com.ixortalk.user.registration.api.dto.UpdateUserDTO;
 import com.ixortalk.user.registration.api.auth.User;
 import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
 import org.springframework.context.annotation.Conditional;

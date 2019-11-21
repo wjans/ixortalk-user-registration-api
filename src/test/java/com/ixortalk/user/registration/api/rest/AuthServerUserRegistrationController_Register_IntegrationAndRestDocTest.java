@@ -26,20 +26,35 @@ package com.ixortalk.user.registration.api.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ixortalk.user.registration.api.AbstractSpringIntegrationTest;
 import com.ixortalk.user.registration.api.auth.User;
+import org.junit.After;
 import org.junit.Test;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.authorizationHeader;
 import static com.ixortalk.test.util.Randomizer.nextString;
-import static com.ixortalk.user.registration.api.auth.CreateUserDTOTestBuilder.aCreateUserDTO;
+import static com.ixortalk.user.registration.api.dto.CreateUserDTOTestBuilder.aCreateUserDTO;
 import static com.ixortalk.user.registration.api.auth.User.newUser;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.http.ContentType.JSON;
-import static java.net.HttpURLConnection.*;
+import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
+import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
+import static java.net.HttpURLConnection.HTTP_OK;
+import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static org.assertj.core.util.Sets.newHashSet;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.JsonFieldType.NULL;
 import static org.springframework.restdocs.payload.JsonFieldType.STRING;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -53,6 +68,11 @@ public class AuthServerUserRegistrationController_Register_IntegrationAndRestDoc
     private static final String FIRST_NAME = nextString("firstName-");
     private static final String LAST_NAME = nextString("lastName-");
     private static final String LANG_KEY = "en";
+
+    @After
+    public void shouldNeverInteractWithAuth0() {
+        verifyZeroInteractions(auth0Users);
+    }
 
     @Test
     public void success() throws JsonProcessingException {
@@ -74,7 +94,7 @@ public class AuthServerUserRegistrationController_Register_IntegrationAndRestDoc
 
         given()
                 .filter(
-                        document("register/ok",
+                        document("auth-server/register/ok",
                                 preprocessRequest(staticUris(), prettyPrint()),
                                 preprocessResponse(prettyPrint()),
                                 requestFields(
@@ -108,7 +128,7 @@ public class AuthServerUserRegistrationController_Register_IntegrationAndRestDoc
     public void invalidRequestBody() throws JsonProcessingException {
         given()
                 .filter(
-                        document("register/invalid-request-body",
+                        document("auth-server/register/invalid-request-body",
                                 preprocessRequest(staticUris(), prettyPrint()),
                                 preprocessResponse(prettyPrint()),
                                 requestFields(
@@ -144,7 +164,7 @@ public class AuthServerUserRegistrationController_Register_IntegrationAndRestDoc
 
         given()
                 .filter(
-                        document("register/error-returned-by-authserver",
+                        document("auth-server/register/error-returned-by-authserver",
                                 preprocessRequest(staticUris(), prettyPrint()),
                                 preprocessResponse(prettyPrint()),
                                 requestFields(

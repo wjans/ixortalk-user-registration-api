@@ -24,8 +24,10 @@
 package com.ixortalk.user.registration.api.rest;
 
 import com.ixortalk.autoconfigure.oauth2.OAuth2AutoConfiguration;
+import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Roles;
 import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Users;
-import com.ixortalk.user.registration.api.auth.CreateUserDTO;
+import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
+import com.ixortalk.user.registration.api.dto.CreateUserWithPasswordDTO;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -45,8 +48,22 @@ public class Auth0UserRegistrationController {
     @Inject
     private Auth0Users auth0Users;
 
+    @Inject
+    private Auth0Roles auth0Roles;
+
+    @Inject
+    private IxorTalkConfigProperties ixorTalkConfigProperties;
+
     @PostMapping(path = "/", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> register(@Valid @RequestBody CreateUserDTO createUserDTO) {
+    public ResponseEntity<?> register(@Valid @RequestBody CreateUserWithPasswordDTO createUserWithPasswordDTO) {
+        auth0Users.createBlockedUser(
+                createUserWithPasswordDTO.getUsername(),
+                createUserWithPasswordDTO.getPassword(),
+                createUserWithPasswordDTO.getFirstName(),
+                createUserWithPasswordDTO.getLastName(),
+                createUserWithPasswordDTO.getLangKey()
+        );
+        auth0Roles.assignRolesToUser(createUserWithPasswordDTO.getUsername(), newHashSet(ixorTalkConfigProperties.getUserRegistration().getDefaultRoles()));
         return ok().build();
     }
 }

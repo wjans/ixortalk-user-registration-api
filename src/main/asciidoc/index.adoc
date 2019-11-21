@@ -6,72 +6,109 @@
 :sectlinks:
 :source-highlighter: highlightjs
 
-
-
 = User Registration API
 
-== Register User
+Depending on configuration of the platform, it will be backed by either an AuthServer within the same platform or Auth0.
+
+== AuthServer
+
+=== Register User
 
 Rest call to register a new user in the platform.  Configurable default roles will be assigned.
 
-=== Request
+==== Request
 
 Via curl:
-include::{snippets}/register/ok/curl-request.adoc[]
+include::{snippets}/auth-server/register/ok/curl-request.adoc[]
 
 HTTP request:
-include::{snippets}/register/ok/http-request.adoc[]
+include::{snippets}/auth-server/register/ok/http-request.adoc[]
 
-==== Request Fields
-include::{snippets}/register/ok/request-fields.adoc[]
+===== Request Fields
+include::{snippets}/auth-server/register/ok/request-fields.adoc[]
 
-=== Response
+==== Response
 
 When everything is ok:
 
-include::{snippets}/register/ok/http-response.adoc[]
+include::{snippets}/auth-server/register/ok/http-response.adoc[]
 
 When the request body is invalid:
 
-include::{snippets}/register/invalid-request-body/http-response.adoc[]
+include::{snippets}/auth-server/register/invalid-request-body/http-response.adoc[]
 
 When the authserver returns an error, the HTTP status code returned by the auth server is propagated back to the client too:
 
-include::{snippets}/register/error-returned-by-authserver/http-response.adoc[]
+include::{snippets}/auth-server/register/error-returned-by-authserver/http-response.adoc[]
 
-== Update User
+=== Update User
 
 Rest call to update logged in user
 
-=== Request
+==== Request
 
 Via curl:
-include::{snippets}/update/ok/curl-request.adoc[]
+include::{snippets}/auth-server/update/ok/curl-request.adoc[]
 
 HTTP request:
-include::{snippets}/update/ok/http-request.adoc[]
+include::{snippets}/auth-server/update/ok/http-request.adoc[]
 
-==== Request Fields
-include::{snippets}/update/ok/request-fields.adoc[]
+===== Request Fields
+include::{snippets}/auth-server/update/ok/request-fields.adoc[]
 
-=== Response
+==== Response
 
 When everything is ok:
 
-include::{snippets}/update/ok/http-response.adoc[]
+include::{snippets}/auth-server/update/ok/http-response.adoc[]
 
 When the request body is invalid:
 
-include::{snippets}/update/invalid-request-body/http-response.adoc[]
+include::{snippets}/auth-server/update/invalid-request-body/http-response.adoc[]
 
 When the logged in user is not found:
 
-include::{snippets}/update/logged-in-user-not-found/http-response.adoc[]
+include::{snippets}/auth-server/update/logged-in-user-not-found/http-response.adoc[]
 
 When there is no logged in user:
 
-include::{snippets}/update/no-logged-in-user/http-response.adoc[]
+include::{snippets}/auth-server/update/no-logged-in-user/http-response.adoc[]
 
 When the authserver returns an error, the HTTP status code returned by the auth server is propagated back to the client too:
 
-include::{snippets}/update/error-returned-by-authserver/http-response.adoc[]
+include::{snippets}/auth-server/update/error-returned-by-authserver/http-response.adoc[]
+
+== Auth0
+
+=== Register User
+
+Rest call to register a new user in Auth0.  This user will be created as a blocked user without receiving an email.  This call is to be used to encapsulate user registration in client API's, where the user can be unblocked later.
+
+==== Request
+
+Via curl:
+include::{snippets}/auth0/register/ok/curl-request.adoc[]
+
+HTTP request:
+include::{snippets}/auth0/register/ok/http-request.adoc[]
+
+===== Request Fields
+include::{snippets}/auth0/register/ok/request-fields.adoc[]
+
+==== Response
+
+When everything is ok:
+
+include::{snippets}/auth0/register/ok/http-response.adoc[]
+
+When the request body is invalid (eg. missing fields):
+
+include::{snippets}/auth0/register/invalid-request-body/http-response.adoc[]
+
+When the Auth0 returns an bad request, the error description is passed to the client:
+
+include::{snippets}/auth0/register/bad-request-returned-by-auth0/http-response.adoc[]
+
+When Auth0 returns any other status code, this status code is propagated without exposing a description.
+
+include::{snippets}/auth0/register/error-returned-by-auth0/http-response.adoc[]

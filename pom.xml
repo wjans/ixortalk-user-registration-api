@@ -29,7 +29,7 @@
 
     <groupId>com.ixortalk</groupId>
     <artifactId>ixortalk-user-registration-api</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
 
     <name>ixortalk-user-registration-api</name>
     <description>IxorTalk microservice exposing an API for User Registration</description>
@@ -90,7 +90,7 @@
         <connection>scm:git:git@github.com:ixortalk/ixortalk-user-registration-api.git</connection>
         <developerConnection>scm:git:git@github.com:ixortalk/ixortalk-user-registration-api.git</developerConnection>
         <url>https://github.com/ixortalk/ixortalk-user-registration-api/tree/master</url>
-        <tag>ixortalk-user-registration-api-1.0.3</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>

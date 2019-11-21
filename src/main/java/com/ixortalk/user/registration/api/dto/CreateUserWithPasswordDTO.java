@@ -21,25 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.ixortalk.user.registration.api.feign;
+package com.ixortalk.user.registration.api.dto;
 
-import feign.RequestInterceptor;
-import feign.RequestTemplate;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import javax.validation.constraints.NotNull;
 
-import static org.springframework.security.oauth2.common.OAuth2AccessToken.BEARER_TYPE;
+public class CreateUserWithPasswordDTO extends CreateUserDTO {
 
-public class OAuth2FeignRequestInterceptor implements RequestInterceptor {
- 
-    private OAuth2RestTemplate oAuth2RestTemplate;
+    @NotNull
+    private String password;
 
-    public OAuth2FeignRequestInterceptor(OAuth2RestTemplate oAuth2RestTemplate) {
-        this.oAuth2RestTemplate = oAuth2RestTemplate;
-    }
-
-    @Override
-    public void apply(RequestTemplate template) {
-         template.header(HttpHeaders.AUTHORIZATION, String.format("%s %s", BEARER_TYPE, oAuth2RestTemplate.getAccessToken().getValue()));
+    public String getPassword() {
+        return password;
     }
 }

@@ -21,44 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.ixortalk.user.registration.api.auth;
+package com.ixortalk.user.registration.api.dto;
 
 import com.ixortalk.test.builder.ReflectionInstanceTestBuilder;
 
 import static com.ixortalk.test.util.Randomizer.nextString;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-public class UpdateUserDTOTestBuilder extends ReflectionInstanceTestBuilder<UpdateUserDTO> {
+public class AbstractCreateUserDTOTestBuilder<TYPE extends CreateUserDTO, BUILDER extends AbstractCreateUserDTOTestBuilder<TYPE, BUILDER>> extends ReflectionInstanceTestBuilder<TYPE> {
 
-    private String firstName = nextString("updatedFirstName-");
-    private String lastName = nextString("updatedLastName-");
-    private String langKey = nextString("updatedLang-");
-
-    private UpdateUserDTOTestBuilder() {}
-
-    public static UpdateUserDTOTestBuilder anUpdateUserDTO() {
-        return new UpdateUserDTOTestBuilder();
-    }
+    private String username = nextString("user-") + "@ixortalk.com";
+    private String firstName = nextString("user_firstName-");
+    private String lastName = nextString("user-lastName-");
+    private String langKey = "en";
 
     @Override
-    public void setFields(UpdateUserDTO updateUserDTO) {
-        setField(updateUserDTO, "firstName", firstName);
-        setField(updateUserDTO, "lastName", lastName);
-        setField(updateUserDTO, "langKey", langKey);
+    public void setFields(TYPE instance) {
+        setField(instance, "username", username);
+        setField(instance, "firstName", firstName);
+        setField(instance, "lastName", lastName);
+        setField(instance, "langKey", langKey);
     }
 
-    public UpdateUserDTOTestBuilder withFirstName(String firstName) {
+    public BUILDER withUsername(String username) {
+        this.username = username;
+        return self();
+    }
+
+    public BUILDER withFirstName(String firstName) {
         this.firstName = firstName;
-        return this;
+        return self();
     }
 
-    public UpdateUserDTOTestBuilder withLastName(String lastName) {
+    public BUILDER withLastName(String lastName) {
         this.lastName = lastName;
-        return this;
+        return self();
     }
 
-    public UpdateUserDTOTestBuilder withLangKey(String langKey) {
+    public BUILDER withLangKey(String langKey) {
         this.langKey = langKey;
-        return this;
+        return self();
+    }
+
+    private BUILDER self() {
+        return (BUILDER) this;
     }
 }

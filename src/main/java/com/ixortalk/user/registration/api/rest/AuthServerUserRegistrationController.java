@@ -23,11 +23,13 @@
  */
 package com.ixortalk.user.registration.api.rest;
 
+import com.ixortalk.autoconfigure.oauth2.OAuth2AutoConfiguration;
 import com.ixortalk.user.registration.api.auth.AuthServer;
-import com.ixortalk.user.registration.api.auth.CreateUserDTO;
-import com.ixortalk.user.registration.api.auth.UpdateUserDTO;
+import com.ixortalk.user.registration.api.dto.CreateUserDTO;
+import com.ixortalk.user.registration.api.dto.UpdateUserDTO;
 import com.ixortalk.user.registration.api.auth.User;
 import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -36,7 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-
 import java.security.Principal;
 
 import static com.google.common.collect.Sets.newHashSet;
@@ -45,7 +46,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
-public class UserRegistrationController {
+@Conditional(OAuth2AutoConfiguration.NoAuth0Condition.class)
+public class AuthServerUserRegistrationController {
 
     @Inject
     private AuthServer authServer;

@@ -21,37 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.ixortalk.user.registration.api.auth;
+package com.ixortalk.user.registration.api.dto;
 
-import javax.validation.constraints.NotNull;
+import static com.ixortalk.test.util.Randomizer.nextString;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-public class CreateUserDTO {
+public class CreateUserWithPasswordDTOTestBuilder extends AbstractCreateUserDTOTestBuilder<CreateUserWithPasswordDTO, CreateUserWithPasswordDTOTestBuilder> {
 
-    @NotNull
-    private String username;
+    private String password = nextString("password");
 
-    @NotNull
-    private String firstName;
+    private CreateUserWithPasswordDTOTestBuilder() {}
 
-    @NotNull
-    private String lastName;
-
-    @NotNull
-    private String langKey;
-
-    public String getUsername() {
-        return username;
+    public static CreateUserWithPasswordDTOTestBuilder aCreateUserWithPasswordDTO() {
+        return new CreateUserWithPasswordDTOTestBuilder();
     }
 
-    public String getFirstName() {
-        return firstName;
+    public void setFields(CreateUserWithPasswordDTO instance) {
+        super.setFields(instance);
+        setField(instance, "password", password);
     }
 
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getLangKey() {
-        return langKey;
+    public CreateUserWithPasswordDTOTestBuilder withPassword(String password) {
+        this.password = password;
+        return this;
     }
 }

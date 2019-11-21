@@ -23,8 +23,11 @@
  */
 package com.ixortalk.user.registration.api;
 
+import com.auth0.client.mgmt.ManagementAPI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Roles;
+import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Users;
 import com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer;
 import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
 import com.jayway.restassured.RestAssured;
@@ -36,6 +39,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.netflix.feign.FeignContext;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.restassured.operation.preprocess.UriModifyingOperationPreprocessor;
@@ -51,7 +55,9 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.inject.Inject;
 
-import static com.google.common.net.HttpHeaders.*;
+import static com.google.common.net.HttpHeaders.X_FORWARDED_HOST;
+import static com.google.common.net.HttpHeaders.X_FORWARDED_PORT;
+import static com.google.common.net.HttpHeaders.X_FORWARDED_PROTO;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_ADMIN;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_SECRET_ADMIN;
 import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig;
@@ -86,8 +92,18 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
     @Value("${server.context-path}")
     protected String contextPath;
 
+    @MockBean
+    protected Auth0Users auth0Users;
+
+    @MockBean
+    protected Auth0Roles auth0Roles;
+
+    @MockBean
+    private ManagementAPI managementAPI;
+
     @Inject
     protected ObjectMapper objectMapper;
+
     @Inject
     protected IxorTalkConfigProperties ixorTalkConfigProperties;
 

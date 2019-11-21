@@ -23,18 +23,20 @@
  */
 package com.ixortalk.user.registration.api.error;
 
+import com.auth0.exception.APIException;
+import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0RuntimeException;
 import com.ixortalk.user.registration.api.UserRegistrationApiApplication;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import static java.util.UUID.randomUUID;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.valueOf;
+import static org.springframework.http.ResponseEntity.badRequest;
+import static org.springframework.http.ResponseEntity.status;
 
 @ControllerAdvice(basePackageClasses = {UserRegistrationApiApplication.class})
 public class GenericExceptionHandler {
@@ -44,13 +46,35 @@ public class GenericExceptionHandler {
     @ExceptionHandler(value = FeignException.class)
     public ResponseEntity handleFeignException(FeignException e) {
         String errorUUID = logError(e);
-        return new ResponseEntity("Error - " + errorUUID, new HttpHeaders(), valueOf(e.status()));
+        return status(e.status()).body("Error - " + errorUUID);
     }
+
+    @ExceptionHandler(value = Auth0RuntimeException.class)
+    public ResponseEntity handleAuth0RuntimeException(Auth0RuntimeException e) {
+        if (e.getCause() instanceof APIException) {
+            APIException apiException = (APIException) e.getCause();
+
+            StringBuilder errorMessage =
+                    new StringBuilder()
+                            .append("Error - ")
+                            .append(logError(e));
+            if (apiException.getStatusCode() == BAD_REQUEST.value()) {
+                errorMessage
+                        .append(": ")
+                        .append(apiException.getDescription());
+            }
+
+            return status(apiException.getStatusCode()).body(errorMessage.toString());
+        } else {
+            return handleException(e);
+        }
+    }
+
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity handleException(Exception e) {
         String errorUUID = logError(e);
-        return new ResponseEntity("Error - " + errorUUID, new HttpHeaders(), BAD_REQUEST);
+        return badRequest().body("Error - " + errorUUID);
     }
 
     private static String logError(Exception e) {

@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ixortalk.user.registration.api.AbstractSpringIntegrationTest;
 import com.ixortalk.user.registration.api.auth.User;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
@@ -38,7 +39,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_USER;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.*;
-import static com.ixortalk.user.registration.api.auth.UpdateUserDTOTestBuilder.anUpdateUserDTO;
+import static com.ixortalk.user.registration.api.dto.UpdateUserDTOTestBuilder.anUpdateUserDTO;
 import static com.ixortalk.user.registration.api.auth.User.newUser;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.http.ContentType.JSON;
@@ -46,6 +47,7 @@ import static java.net.HttpURLConnection.*;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.lang.math.RandomUtils.nextLong;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.JsonFieldType.NULL;
 import static org.springframework.restdocs.payload.JsonFieldType.STRING;
@@ -55,7 +57,7 @@ import static org.springframework.restdocs.restassured.RestAssuredRestDocumentat
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 @OAuth2ContextConfiguration(AbstractSpringIntegrationTest.AdminClientCredentialsResourceDetails.class)
-public class UserRegistrationController_Update_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
+public class AuthServerUserRegistrationController_Update_IntegrationAndRestDocTest extends AbstractSpringIntegrationTest {
 
     private static final Set<String> EXISTING_AUTHORITIES = newHashSet("ROLE_EXISTING_1", "ROLE_EXISTING_2");
 
@@ -95,6 +97,11 @@ public class UserRegistrationController_Update_IntegrationAndRestDocTest extends
         );
     }
 
+    @After
+    public void shouldNeverInteractWithAuth0() {
+        verifyZeroInteractions(auth0Users);
+    }
+
     @Test
     public void success() throws JsonProcessingException {
         stubFor(
@@ -116,7 +123,7 @@ public class UserRegistrationController_Update_IntegrationAndRestDocTest extends
 
         given()
                 .filter(
-                        document("update/ok",
+                        document("auth-server/update/ok",
                                 preprocessRequest(staticUris(), prettyPrint()),
                                 preprocessResponse(prettyPrint()),
                                 requestFields(
@@ -156,7 +163,7 @@ public class UserRegistrationController_Update_IntegrationAndRestDocTest extends
 
         given()
                 .filter(
-                        document("update/logged-in-user-not-found",
+                        document("auth-server/update/logged-in-user-not-found",
                                 preprocessRequest(staticUris(), prettyPrint()),
                                 preprocessResponse(prettyPrint()),
                                 requestFields(
@@ -186,7 +193,7 @@ public class UserRegistrationController_Update_IntegrationAndRestDocTest extends
     public void invalidRequestBody() throws JsonProcessingException {
         given()
                 .filter(
-                        document("update/invalid-request-body",
+                        document("auth-server/update/invalid-request-body",
                                 preprocessRequest(staticUris(), prettyPrint()),
                                 preprocessResponse(prettyPrint()),
                                 requestFields(
@@ -243,7 +250,7 @@ public class UserRegistrationController_Update_IntegrationAndRestDocTest extends
 
         given()
                 .filter(
-                        document("update/error-returned-by-authserver",
+                        document("auth-server/update/error-returned-by-authserver",
                                 preprocessRequest(staticUris(), prettyPrint()),
                                 preprocessResponse(prettyPrint()),
                                 requestFields(
@@ -271,7 +278,7 @@ public class UserRegistrationController_Update_IntegrationAndRestDocTest extends
     public void noLoggedInUser() throws JsonProcessingException {
         given()
                 .filter(
-                        document("update/no-logged-in-user",
+                        document("auth-server/update/no-logged-in-user",
                                 preprocessRequest(staticUris(), prettyPrint()),
                                 preprocessResponse(prettyPrint()),
                                 requestFields(

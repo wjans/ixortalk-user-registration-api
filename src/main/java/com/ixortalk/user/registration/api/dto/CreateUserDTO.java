@@ -21,24 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.ixortalk.user.registration.api.config;
+package com.ixortalk.user.registration.api.dto;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import javax.validation.constraints.NotNull;
 
-import static org.springframework.http.HttpMethod.POST;
+public class CreateUserDTO {
 
-@Configuration
-@EnableResourceServer
-public class ResourceServer extends ResourceServerConfigurerAdapter {
+    @NotNull
+    private String username;
 
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .antMatchers(POST, "/").permitAll()
-                .anyRequest().authenticated();
+    @NotNull
+    private String firstName;
+
+    @NotNull
+    private String lastName;
+
+    @NotNull
+    private String langKey;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getLangKey() {
+        return langKey;
     }
 }

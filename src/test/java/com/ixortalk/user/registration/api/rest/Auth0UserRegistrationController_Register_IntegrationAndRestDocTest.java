@@ -35,7 +35,6 @@ import org.springframework.test.context.TestPropertySource;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
-import static com.google.common.collect.Sets.newHashSet;
 import static com.ixortalk.test.util.Randomizer.nextString;
 import static com.ixortalk.user.registration.api.dto.CreateUserWithPasswordDTOTestBuilder.aCreateUserWithPasswordDTO;
 import static com.jayway.restassured.RestAssured.given;
@@ -46,6 +45,7 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -113,8 +113,7 @@ public class Auth0UserRegistrationController_Register_IntegrationAndRestDocTest 
                 .then()
                 .statusCode(HTTP_OK);
 
-        verify(auth0Users).createBlockedUser(LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, LANG_KEY);
-        verify(auth0Roles).assignRolesToUser(LOGIN, newHashSet(ixorTalkConfigProperties.getUserRegistration().getDefaultRoles()));
+        verify(auth0Users).createBlockedUser(LOGIN, PASSWORD, FIRST_NAME, LAST_NAME, LANG_KEY, ixorTalkConfigProperties.getUserRegistration().getDefaultRoles());
     }
 
     @Test
@@ -156,7 +155,7 @@ public class Auth0UserRegistrationController_Register_IntegrationAndRestDocTest 
 
         doThrow(new Auth0RuntimeException("", new APIException(AUTH_0_BAD_REQUEST_DESCRIPTION, HTTP_BAD_REQUEST, new RuntimeException("Faked exception"))))
                 .when(auth0Users)
-                .createBlockedUser(anyString(), anyString(), anyString(), anyString(), anyString());
+                .createBlockedUser(anyString(), anyString(), anyString(), anyString(), anyString(), anyList());
 
         given()
                 .filter(
@@ -185,7 +184,7 @@ public class Auth0UserRegistrationController_Register_IntegrationAndRestDocTest 
 
         doThrow(new Auth0RuntimeException("", new APIException(AUTH_0_FORBIDDEN_ERROR_MESSAGE, HTTP_FORBIDDEN, new RuntimeException("Faked exception"))))
                 .when(auth0Users)
-                .createBlockedUser(anyString(), anyString(), anyString(), anyString(), anyString());
+                .createBlockedUser(anyString(), anyString(), anyString(), anyString(), anyString(), anyList());
 
         given()
                 .filter(

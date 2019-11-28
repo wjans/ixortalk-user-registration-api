@@ -33,7 +33,8 @@ ixortalk:
     default-roles:
       - ROLE_1
       - ROLE_2
-
+  profile-picture:
+    s3-bucket: configured-profile-picture-bucket
 
 security:
     oauth2:

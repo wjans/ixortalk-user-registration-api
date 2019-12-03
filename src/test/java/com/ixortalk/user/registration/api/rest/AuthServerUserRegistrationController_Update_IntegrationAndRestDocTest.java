@@ -37,7 +37,7 @@ import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_USER;
+import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.USER_NAME;
 import static com.ixortalk.test.oauth2.OAuth2TestTokens.*;
 import static com.ixortalk.user.registration.api.dto.UpdateUserDTOTestBuilder.anUpdateUserDTO;
 import static com.ixortalk.user.registration.api.auth.User.newUser;
@@ -73,10 +73,10 @@ public class AuthServerUserRegistrationController_Update_IntegrationAndRestDocTe
     public void before() throws JsonProcessingException {
         User existingUser =
                 newUser()
-                        .withLogin(CLIENT_ID_USER)
+                        .withLogin(USER_NAME)
                         .withFirstName("existing first name")
                         .withLastName("existing last name")
-                        .withEmail(CLIENT_ID_USER)
+                        .withEmail(USER_NAME)
                         .withActivated(true)
                         .withLangKey("existing lang key")
                         .withAuthorities(EXISTING_AUTHORITIES)
@@ -85,7 +85,7 @@ public class AuthServerUserRegistrationController_Update_IntegrationAndRestDocTe
         setField(existingUser, "id", EXISTING_USER_S_ID);
 
         stubFor(
-                get(urlEqualTo("/api/users/" + CLIENT_ID_USER))
+                get(urlEqualTo("/api/users/" + USER_NAME))
                         .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
                         .willReturn(
                                 aResponse()
@@ -111,10 +111,10 @@ public class AuthServerUserRegistrationController_Update_IntegrationAndRestDocTe
 
         User expectedUser =
                 newUser()
-                        .withLogin(CLIENT_ID_USER)
+                        .withLogin(USER_NAME)
                         .withFirstName(NEW_FIRST_NAME)
                         .withLastName(NEW_LAST_NAME)
-                        .withEmail(CLIENT_ID_USER)
+                        .withEmail(USER_NAME)
                         .withActivated(true)
                         .withLangKey(NEW_LANG_KEY)
                         .withAuthorities(EXISTING_AUTHORITIES)
@@ -155,7 +155,7 @@ public class AuthServerUserRegistrationController_Update_IntegrationAndRestDocTe
     @Test
     public void userNotFound() throws JsonProcessingException {
         stubFor(
-                get(urlEqualTo("/api/users/" + CLIENT_ID_USER))
+                get(urlEqualTo("/api/users/" + USER_NAME))
                         .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
                         .willReturn(
                                 aResponse()

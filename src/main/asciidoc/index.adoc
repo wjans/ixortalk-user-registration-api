@@ -112,3 +112,30 @@ include::{snippets}/auth0/register/bad-request-returned-by-auth0/http-response.a
 When Auth0 returns any other status code, this status code is propagated without exposing a description.
 
 include::{snippets}/auth0/register/error-returned-by-auth0/http-response.adoc[]
+
+=== Generate Profile Picture URL
+
+A secured REST call to generate a presigned S3 URL which can be used to upload a profile picture to.  The public read equivalent of this link is stored on the logged in user's Auth0 profile.  Uploading a profile picture can be done by performing a binary `PUT` to the returned URL.
+
+==== Request
+
+Via curl:
+include::{snippets}/auth0/generate-profile-picture-url/ok/curl-request.adoc[]
+
+HTTP request:
+include::{snippets}/auth0/generate-profile-picture-url/ok/http-request.adoc[]
+
+Request Headers:
+include::{snippets}/auth0/generate-profile-picture-url/ok/request-headers.adoc[]
+
+==== Response
+
+When everything is ok:
+
+include::{snippets}/auth0/generate-profile-picture-url/ok/http-response.adoc[]
+
+include::{snippets}/auth0/generate-profile-picture-url/ok/response-fields.adoc[]
+
+When there is no logged in user:
+
+include::{snippets}/auth0/generate-profile-picture-url/not-logged-in/http-response.adoc[]

@@ -23,13 +23,13 @@
  */
 package com.ixortalk.user.registration.api.config;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
+import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.Valid;
+import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -40,8 +40,15 @@ public class IxorTalkConfigProperties {
     @Valid
     private UserRegistration userRegistration = new UserRegistration();
 
+    @Valid
+    private ProfilePicture profilePicture = new ProfilePicture();
+
     public UserRegistration getUserRegistration() {
         return userRegistration;
+    }
+
+    public ProfilePicture getProfilePicture() {
+        return profilePicture;
     }
 
     public static class UserRegistration {
@@ -51,6 +58,20 @@ public class IxorTalkConfigProperties {
 
         public List<String> getDefaultRoles() {
             return defaultRoles;
+        }
+    }
+
+    public static class ProfilePicture {
+
+        @NotBlank
+        private String s3Bucket;
+
+        public String getS3Bucket() {
+            return s3Bucket;
+        }
+
+        public void setS3Bucket(String s3Bucket) {
+            this.s3Bucket = s3Bucket;
         }
     }
 }

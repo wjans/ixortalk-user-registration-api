@@ -26,8 +26,10 @@ package com.ixortalk.user.registration.api;
 import com.auth0.client.mgmt.ManagementAPI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0ManagementAPI;
 import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Roles;
 import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Users;
+import com.ixortalk.aws.s3.library.config.AwsS3Template;
 import com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer;
 import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
 import com.jayway.restassured.RestAssured;
@@ -42,6 +44,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.netflix.feign.FeignContext;
 import org.springframework.restdocs.JUnitRestDocumentation;
+import org.springframework.restdocs.headers.HeaderDescriptor;
 import org.springframework.restdocs.restassured.operation.preprocess.UriModifyingOperationPreprocessor;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.test.OAuth2ContextSetup;
@@ -63,6 +66,7 @@ import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_SECRET_AD
 import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig;
 import static com.jayway.restassured.config.RestAssuredConfig.config;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.restassured.operation.preprocess.RestAssuredPreprocessors.modifyUris;
 import static org.springframework.security.oauth2.client.test.OAuth2ContextSetup.standard;
@@ -76,6 +80,8 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
 
     private static final String HOST_IXORTALK_COM = "www.ixortalk.com";
     private static final String HTTPS = "https";
+
+    public static final HeaderDescriptor AUTHORIZATION_TOKEN_HEADER = headerWithName("Authorization").description("The bearer token needed to authorize this request.");
 
     @Rule
     public WireMockRule authServerWireMockRule = new WireMockRule(65444);
@@ -100,6 +106,12 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
 
     @MockBean
     private ManagementAPI managementAPI;
+
+    @MockBean
+    protected Auth0ManagementAPI auth0ManagementAPI;
+
+    @MockBean
+    protected AwsS3Template awsS3Template;
 
     @Inject
     protected ObjectMapper objectMapper;

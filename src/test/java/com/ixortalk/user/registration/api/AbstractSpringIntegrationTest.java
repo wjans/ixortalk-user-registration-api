@@ -25,7 +25,10 @@ package com.ixortalk.user.registration.api;
 
 import com.auth0.client.mgmt.ManagementAPI;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.matching.MatchResult;
+import com.github.tomakehurst.wiremock.matching.ValueMatcher;
 import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0ManagementAPI;
 import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Roles;
 import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Users;
@@ -57,6 +60,9 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import javax.inject.Inject;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import static com.google.common.net.HttpHeaders.X_FORWARDED_HOST;
 import static com.google.common.net.HttpHeaders.X_FORWARDED_PORT;
@@ -65,11 +71,15 @@ import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_ADMIN;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_SECRET_ADMIN;
 import static com.jayway.restassured.config.ObjectMapperConfig.objectMapperConfig;
 import static com.jayway.restassured.config.RestAssuredConfig.config;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.restassured.operation.preprocess.RestAssuredPreprocessors.modifyUris;
+import static org.springframework.security.jwt.JwtHelper.decode;
 import static org.springframework.security.oauth2.client.test.OAuth2ContextSetup.standard;
+import static org.springframework.security.oauth2.provider.token.AccessTokenConverter.AUTHORITIES;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 @SpringBootTest(classes = {UserRegistrationApiApplication.class, OAuth2EmbeddedTestServer.class}, webEnvironment = RANDOM_PORT)
@@ -133,7 +143,7 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
     }
 
     @Before
-    public void restAssured() {
+    public void setup() {
         RestAssured.port = port;
         RestAssured.basePath = contextPath;
         RestAssured.config = config().objectMapperConfig(objectMapperConfig().jackson2ObjectMapperFactory((cls, charset) -> objectMapper));
@@ -167,5 +177,17 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
             setClientId(CLIENT_ID_ADMIN);
             setClientSecret(CLIENT_SECRET_ADMIN);
         }
+    }
+
+    protected static ValueMatcher<Request> jwtTokenWithAuthority(String role) {
+        return request -> {
+            try {
+                String authorizationHeader = request.getHeader(AUTHORIZATION);
+                String bearerToken = substringAfter(authorizationHeader, org.springframework.cloud.security.oauth2.client.feign.OAuth2FeignRequestInterceptor.BEARER + " ");
+                return MatchResult.of(((List<String>) new ObjectMapper().readValue(decode(bearerToken).getClaims(), Map.class).get(AUTHORITIES)).contains(role));
+            } catch (IOException e) {
+                throw new RuntimeException("Could not deserialize claims: " + e.getMessage(), e);
+            }
+        };
     }
 }

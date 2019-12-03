@@ -84,9 +84,9 @@ public class AuthServerUserRegistrationController_Update_IntegrationAndRestDocTe
 
         setField(existingUser, "id", EXISTING_USER_S_ID);
 
-        stubFor(
+        authServerWireMockRule.stubFor(
                 get(urlEqualTo("/api/users/" + USER_NAME))
-                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .andMatching(jwtTokenWithAuthority("ROLE_ADMIN"))
                         .willReturn(
                                 aResponse()
                                         .withStatus(SC_OK)
@@ -104,9 +104,9 @@ public class AuthServerUserRegistrationController_Update_IntegrationAndRestDocTe
 
     @Test
     public void success() throws JsonProcessingException {
-        stubFor(
+        authServerWireMockRule.stubFor(
                 put(urlEqualTo("/api/users"))
-                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .andMatching(jwtTokenWithAuthority("ROLE_ADMIN"))
                         .willReturn(aResponse().withStatus(HTTP_OK)));
 
         User expectedUser =
@@ -148,15 +148,15 @@ public class AuthServerUserRegistrationController_Update_IntegrationAndRestDocTe
 
         verify(
                 putRequestedFor(urlMatching("/api/users"))
-                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .andMatching(jwtTokenWithAuthority("ROLE_ADMIN"))
                         .withRequestBody(equalToJson(objectMapper.writeValueAsString(expectedUser))));
     }
 
     @Test
     public void userNotFound() throws JsonProcessingException {
-        stubFor(
+        authServerWireMockRule.stubFor(
                 get(urlEqualTo("/api/users/" + USER_NAME))
-                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .andMatching(jwtTokenWithAuthority("ROLE_ADMIN"))
                         .willReturn(
                                 aResponse()
                                         .withStatus(SC_NOT_FOUND)));
@@ -221,9 +221,9 @@ public class AuthServerUserRegistrationController_Update_IntegrationAndRestDocTe
 
     @Test
     public void authServerReturnsBadRequest() throws JsonProcessingException {
-        stubFor(
+        authServerWireMockRule.stubFor(
                 put(urlEqualTo("/api/users"))
-                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .andMatching(jwtTokenWithAuthority("ROLE_ADMIN"))
                         .willReturn(aResponse().withStatus(HTTP_BAD_REQUEST)));
 
         given()
@@ -243,9 +243,9 @@ public class AuthServerUserRegistrationController_Update_IntegrationAndRestDocTe
 
     @Test
     public void authServerReturnsInternalServerError() throws JsonProcessingException {
-        stubFor(
+        authServerWireMockRule.stubFor(
                 put(urlEqualTo("/api/users"))
-                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .andMatching(jwtTokenWithAuthority("ROLE_ADMIN"))
                         .willReturn(aResponse().withStatus(HTTP_INTERNAL_ERROR)));
 
         given()

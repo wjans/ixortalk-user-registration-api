@@ -31,19 +31,15 @@ import org.junit.Test;
 import org.springframework.security.oauth2.client.test.OAuth2ContextConfiguration;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static com.ixortalk.test.oauth2.OAuth2TestTokens.adminToken;
-import static com.ixortalk.test.oauth2.OAuth2TestTokens.authorizationHeader;
 import static com.ixortalk.test.util.Randomizer.nextString;
-import static com.ixortalk.user.registration.api.dto.CreateUserDTOTestBuilder.aCreateUserDTO;
 import static com.ixortalk.user.registration.api.auth.User.newUser;
+import static com.ixortalk.user.registration.api.dto.CreateUserDTOTestBuilder.aCreateUserDTO;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.http.ContentType.JSON;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
@@ -76,9 +72,9 @@ public class AuthServerUserRegistrationController_Register_IntegrationAndRestDoc
 
     @Test
     public void success() throws JsonProcessingException {
-        stubFor(
+        authServerWireMockRule.stubFor(
                 post(urlEqualTo("/api/users"))
-                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .andMatching(jwtTokenWithAuthority("ROLE_ADMIN"))
                         .willReturn(aResponse().withStatus(HTTP_OK)));
 
         User expectedUser =
@@ -120,7 +116,7 @@ public class AuthServerUserRegistrationController_Register_IntegrationAndRestDoc
 
         verify(
                 postRequestedFor(urlMatching("/api/users"))
-                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .andMatching(jwtTokenWithAuthority("ROLE_ADMIN"))
                         .withRequestBody(equalToJson(objectMapper.writeValueAsString(expectedUser))));
     }
 
@@ -157,9 +153,9 @@ public class AuthServerUserRegistrationController_Register_IntegrationAndRestDoc
 
     @Test
     public void authServerReturnsBadRequest() throws JsonProcessingException {
-        stubFor(
+        authServerWireMockRule.stubFor(
                 post(urlEqualTo("/api/users"))
-                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .andMatching(jwtTokenWithAuthority("ROLE_ADMIN"))
                         .willReturn(aResponse().withStatus(HTTP_BAD_REQUEST)));
 
         given()
@@ -184,9 +180,9 @@ public class AuthServerUserRegistrationController_Register_IntegrationAndRestDoc
 
     @Test
     public void authServerReturnsInternalServerError() throws JsonProcessingException {
-        stubFor(
+        authServerWireMockRule.stubFor(
                 post(urlEqualTo("/api/users"))
-                        .withHeader("Authorization", equalTo(authorizationHeader(adminToken())))
+                        .andMatching(jwtTokenWithAuthority("ROLE_ADMIN"))
                         .willReturn(aResponse().withStatus(HTTP_INTERNAL_ERROR)));
 
         given()

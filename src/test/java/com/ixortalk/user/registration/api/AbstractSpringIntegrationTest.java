@@ -32,20 +32,20 @@ import com.github.tomakehurst.wiremock.matching.ValueMatcher;
 import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0ManagementAPI;
 import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Roles;
 import com.ixortalk.autoconfigure.oauth2.auth0.mgmt.api.Auth0Users;
+import com.ixortalk.autoconfigure.oauth2.feign.OAuth2FeignRequestInterceptor;
 import com.ixortalk.aws.s3.library.config.AwsS3Template;
 import com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer;
 import com.ixortalk.user.registration.api.config.IxorTalkConfigProperties;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.builder.RequestSpecBuilder;
-import feign.RequestInterceptor;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cloud.netflix.feign.FeignContext;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.headers.HeaderDescriptor;
 import org.springframework.restdocs.restassured.operation.preprocess.UriModifyingOperationPreprocessor;
@@ -129,8 +129,8 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
     @Inject
     protected IxorTalkConfigProperties ixorTalkConfigProperties;
 
-    @Inject
-    private FeignContext feignContext;
+    @Autowired(required = false)
+    private OAuth2FeignRequestInterceptor oAuth2FeignRequestInterceptor;
 
     private RestOperations restTemplate = new RestTemplate();
 
@@ -162,11 +162,8 @@ public abstract class AbstractSpringIntegrationTest implements RestTemplateHolde
 
     public void setRestTemplate(RestOperations restTemplate) {
         this.restTemplate = restTemplate;
-        if (restTemplate instanceof OAuth2RestTemplate) {
-            feignContext.getContextNames()
-                    .stream()
-                    .map(feignContextName -> feignContext.getInstance(feignContextName, RequestInterceptor.class))
-                    .forEach(requestInterceptor -> setField(requestInterceptor, "oAuth2RestTemplate", restTemplate, OAuth2RestTemplate.class));
+        if (oAuth2FeignRequestInterceptor != null && restTemplate instanceof OAuth2RestTemplate) {
+            setField(oAuth2FeignRequestInterceptor, "oAuth2RestTemplate", restTemplate, OAuth2RestTemplate.class);
         }
     }
 

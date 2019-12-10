@@ -23,8 +23,6 @@
  */
 package com.ixortalk.user.registration.api.auth;
 
-import com.ixortalk.autoconfigure.oauth2.feign.ServiceToServiceFeignConfiguration;
-import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -33,7 +31,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
-@FeignClient(name = "authserver",url = "${ixortalk.server.authserver.url}", configuration = ServiceToServiceFeignConfiguration.class, decode404 = true)
 public interface AuthServer {
 
     @RequestMapping(method = GET, path = "/api/users/{login}", produces = APPLICATION_JSON_VALUE)
